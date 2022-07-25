@@ -1,0 +1,196 @@
+<!-- 
+  There are 3 parts to this exercise, focus on the first two parts, if you have time and want to show
+      more of your abilities please feel free to do as much of the 3rd part as you are able to.
+
+  !!!!!!!!!!!!!!!!!Please just create a fork of this project to do your work on.!!!!!!!!!!!!!!!!!
+
+  Part 1: Render a list from API call
+    - Data API -  https://emplistapi-258220.appspot.com/
+    - API returns list employees with the following format:
+            {
+              "name": {
+                        "first": string,
+                        "last": string,
+                      },
+              "jobTitle": string,
+              "photoURL": string?
+            }
+    - The API accepts two parameters: pageSize, pageNumber (theres a limited amount of mock data, high 
+      page numbers wont contain data)
+    - Employees are required to have a first name, last name, and job title.
+    - Not all employees have a photo
+    - Sample list view - https://storage.googleapis.com/sampleemplistbucket/interviewsample.jpg
+        - Please use this as a reference for what could be done
+  Part 2: Implement an "Add Employee" button
+    - Clicking the button should show a modal form containing all possible fields used to add an employee
+    - The data provided doesn't actually need to save to the server. Clicking
+      "save", however, should show a message that the employee was saved, then close the      
+      modal. 
+    - The data that would have been saved to the server should be the return value of the function
+    - There are a limited amount of job title options
+    - Required employee information should be validated before saving
+  Part 3: Optional things that you might want to do if you are able to and want to show you abilities
+    - Sorting
+    - Drag and drop
+    - Load more
+    - Anything else that you can think of that might be useful on a web form like this
+
+  Requirements:
+    - Only needs to work in Chrome. Other browsers will not be looked at.
+    - Should be responsive from 375x667 (iPhone 6/7/8 preset in Chrome Dev Tools) to 1920x1080. 
+      *** 768x1024 to 1920x1080 should be prioritized ***
+    - Document any assumptions
+    - Any style guide is fine, but MUST be consistent
+    - Can use Bulma (included)
+    - DO NOT use any other libraries or frameworks (jQuery, React, etc)
+    - Does not need to be pixel perfect, focus is on reusability, readability, consistency, best practices, etc.
+Resources:
+Bulma - https://bulma.io/documentation/
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Syntec Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+<body onload="get_Employees();">
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        </div>
+        <div class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item">
+            Home
+            </a>
+            <a class="navbar-item">
+            Appointments
+            </a>
+            <a class="navbar-item">
+            Clients
+            </a>
+            <a class="navbar-item">
+            Employees
+            </a>
+        </div>
+        <div class="navbar-end">
+            <a class="navbar-item">Sign Out</a>
+        </div>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Employees</h1>
+            <ul id="employees">
+                <!-- Employee information is rendered here -->
+            </ul>
+            <br/>
+            <nav class="level">
+                <!-- Level Left side -->
+                <div class="level-left">
+                    
+                    <!-- Add pagination -->
+                    <nav class="pagination is-right" role="navigation" aria-label="pagination">
+                        <a class="pagination-previous">Previous</a>
+                        <a class="pagination-next">Next page</a>
+                      </nav>
+                </div>
+            
+                <!--Level Right side -->
+                <div class="level-right">
+                    <div class="level-item">
+                        <button id="addEmployee" class="has-text-white has-background-info button">
+                            <span>Add Employee</span>
+                            <span class="icon is-small">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </section>
+</body>
+
+<!--Modal-->
+<div class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <div class="box">
+            <article class="media">
+              <div class="media-content">
+                <div class="content">
+                    <!--Employee Form-->
+                    <form id="new_employee_form">
+                        <div class="field">
+                            <label class="label">First Name</label>
+                            <div class="control">
+                                <input id="first_name" name="first_name" class="input" type="text" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Last Name</label>
+                            <div class="control">
+                                <input id="last_name" name="last_name" class="input" type="text" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Job Title</label>
+                            <div class="control">
+                                <input id="job_title" name="job_title" class="input" type="text" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div id="file" class="file has-name">
+                                <label class="file-label">
+                                <input name="profile_picture" id="profile_picture" class="file-input" type="file" name="profile_picture">
+                                <span class="file-cta">
+                                    <span class="file-icon">
+                                    <i class="fas fa-upload"></i>
+                                    </span>
+                                    <span class="file-label">
+                                    Choose a file…
+                                    </span>
+                                </span>
+                                <span class="file-name">
+                                    No file uploaded
+                                </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button type="button" id="submit-emp-form" class="button is-link">Submit</button>
+                            </div>
+                            <div class="control">
+                                <button class="close-form button is-link is-light">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+              </div>
+            </article>
+          </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+</div>
+
+<footer>
+</footer>
+<script src="js/demo.js"></script>
