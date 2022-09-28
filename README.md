@@ -1,1 +1,1 @@
-# Syntec-Web-Demo
+#Vanilla JS,CSS and Bulma API demo
