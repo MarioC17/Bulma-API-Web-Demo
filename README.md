@@ -1,1 +1,1 @@
-#Vanilla JS,CSS and Bulma API demo
+#Simple blog web application built using JS,CSS and Bulma API dem
